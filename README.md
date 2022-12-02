@@ -1,3 +1,3 @@
 # ng-universal
 
-An Angular Universal project using 
+An Angular Universal project
