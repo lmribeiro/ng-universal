@@ -13,7 +13,6 @@ export function app() {
   const server = express();
   const distFolder = join(process.cwd(), 'dist/browser');
   const indexHtml = existsSync(join(distFolder, 'index.original.html')) ? 'index.original.html' : 'index';
-
   const axios = require('axios');
 
   // Our Universal express-engine (found @ https://github.com/angular/universal/tree/master/modules/express-engine)
@@ -37,53 +36,37 @@ export function app() {
 
   // All regular routes use the Universal engine
   server.get('*', async (req, res) => {
-    const response = await axios.get('https://egoiapp2.com/landingpage/show/1ehe3cFy/rockdesegunda');
+    const response = await axios.get('https://opticae.online/api/ssr/index');
     const data = response.data.data;
-    console.log(data.integrations);
-    console.log(req.url);
+    console.log(data);
 
     let facebookPixel = '';
-    if (data.integrations.facebook_pixel.enabled) {
+    if (data?.facebookPixel) {
       facebookPixel = '<script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?' +
         'n.callMethod.apply(n,arguments):n.queue.push(arguments)};' +
         'if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version="2.0";' +
         'n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];' +
         's.parentNode.insertBefore(t,s)}(window, document,"script","https://connect.facebook.net/en_US/fbevents.js");' +
-        'fbq("init","' + data.integrations.facebook_pixel.trackingId + '");fbq("track", "PageView");</script>';
+        'fbq("init","' + data.facebookPixel + '");fbq("track", "PageView");</script>';
     }
 
     let googleAnalytics = '';
-    if (data.integrations.google_analytics.enabled) {
-      googleAnalytics = '<script async src="https://www.googletagmanager.com/gtag/js?id=' + data.integrations.google_analytics.trackingId + '"></script>' +
+    if (data?.googleAnalytics) {
+      googleAnalytics = '<script async src="https://www.googletagmanager.com/gtag/js?id=' + data.googleAnalytics + '"></script>' +
         '<script>window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);}' +
-        'gtag("js", new Date()); gtag("config", "' + data.integrations.google_analytics.trackingId + '");</script>';
+        'gtag("js", new Date()); gtag("config", "' + data.googleAnalytics + '");</script>';
     }
-
-    let codeHeader = '';
-    let codeBeginBody = '';
-    let codeEndBody = '';
-    if (data.integrations.custom_tracking.enabled) {
-      codeHeader = data.integrations.custom_tracking.codeHeader;
-      codeBeginBody = data.integrations.custom_tracking.codeBeginBody;
-      codeEndBody = data.integrations.custom_tracking.codeEndBody;
-    }
-
-    // console.log(pixel);
 
     res.render(indexHtml, {
         req, providers: [
           {provide: APP_BASE_HREF, useValue: req.baseUrl}
         ],
-        lang: data.lang ? data.lang : 'en',
-        title: data.title,
-        description: data.title,
-        // url: data.url,
-        keywords: data.keywords,
-        facebookPixel,
-        googleAnalytics,
-        codeHeader,
-        codeBeginBody,
-        codeEndBody
+      lang: data?.lang ? data.lang : 'en',
+      title: data?.title,
+      description: data?.description,
+      keywords: data?.keywords,
+      facebookPixel,
+      googleAnalytics,
       }
     );
   });
